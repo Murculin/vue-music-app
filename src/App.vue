@@ -17,7 +17,7 @@
 <script>
 import HomeHeader from './components/HomeHeader'
 import TabBar from './common/tab-bar/TabBar'
-import Player from './components/player/player'
+import Player from './components/player/Player'
 export default {
   data () {
     return {

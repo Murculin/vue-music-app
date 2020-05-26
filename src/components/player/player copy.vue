@@ -8,7 +8,7 @@
         <h1 class="title">{{ currentSong.name }}</h1>
         <h2 class="subtitle">{{ currentSong.singer }}</h2>
         <div class="back">
-          <i class="iconfont icon-back" @click="exitFullScreen">&#xe62e;</i>
+          <i class="iconfont icon-back iconjiantouxia" @click="exitFullScreen"></i>
         </div>
       </div>
       <div class="middle"
@@ -29,9 +29,6 @@
                 </div>
               </slide-top>
             </div>
-          </div>
-          <div class="playing-lyric">
-            <div class="playing-lyric-content" ref="playingLyric">{{ currentLyric }}</div>
           </div>
         </div>
         <div class="middle-r" ref="middleR">
@@ -90,18 +87,13 @@
 
 <script>
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-import Slidey from 'common/animation/slidey'
 import SlideTop from 'common/animation/slide-top'
 import FadeIn from 'common/animation/fadeIn'
 import Fade from 'common/animation/fade'
-import CirclePro from 'common/circle/circle'
 import Lyric from '../lyric/lyric'
 import Playlist from '../playlist/playlist'
 import { shuffle } from '@/assets/js/util.js'
 import { getLyric } from 'api/song.js'
-import { Base64 } from 'js-base64'
-import { ERR_OK } from 'api/config.js'
-import { Transform } from 'stream'
 import { Toast } from 'mint-ui'
 
 const BTN_WIDTH = 15
@@ -112,7 +104,6 @@ export default {
   data () {
     return {
       showCD: false,
-      showMini: false,
       showPlaylist: false,
       prevImg: '',
       canClick: true,
@@ -121,17 +112,7 @@ export default {
       btnMove: false,
       btnTouch: {},
       afterTime: 0,
-      miniWidth: 0,
       lyrics: [],
-      currentLyric: {},
-      nextLyric: '',
-      lyricWidth: 0,
-      middleTouch: {
-        x1: 0,
-        x2: 0,
-        disX: 0,
-        translateX: 0
-      },
       isFlip: false,
       duration: '00:00'
     }
@@ -180,6 +161,12 @@ export default {
   },
   created() {
     this.width = 0
+    this.middleTouch = {
+      x1: 0,
+      x2: 0,
+      disX: 0,
+      translateX: 0
+    }
   },
   methods: {
     exitFullScreen () {
@@ -227,7 +214,7 @@ export default {
       }, 1000)
       this.setPlaying(true)
     },
-    canPlay (e) { // audio准备好时定的回调函数
+    canPlay (e) { // audio准备好时的回调函数
       this.duration = e.target.duration
     },
     timeUpdate (e) { // audio播放时的回调函数
@@ -375,19 +362,6 @@ export default {
         return lyricsArr
       }
     },
-    setCurrentLyric () {
-      let currentTime = this.currentTime
-      if (this.lyrics.length === 0) {
-        this.currentLyric = '纯音乐，暂无歌词，请欣赏'
-        return
-      }
-      this.lyrics.some((item,index) => {
-        if (currentTime > item.time) {
-          this.currentLyric = item.clause
-          return true
-        }
-      })
-    },
     // 滑动部分
     middleTouchStart (e) {
       this.width = this.$refs.middleR.clientWidth
@@ -469,15 +443,12 @@ export default {
       if (!this.btnMove) {
         this.setProgress(offsetX)
       }
-      this.setCurrentLyric()
     }
   },
   components: {
     FadeIn,
     Fade,
-    Slidey,
     SlideTop,
-    CirclePro,
     Lyric,
     Playlist
   }
@@ -497,6 +468,9 @@ export default {
       z-index 151
       background #222
       transition all 0.5s
+      display flex
+      flex-direction column
+      justify-content space-between
       .background
         position absolute
         top 0
@@ -511,7 +485,6 @@ export default {
           height 100%
       .top
         position relative
-        margin-bottom 50px
         color $activeColor
         .back
           position absolute
@@ -540,23 +513,25 @@ export default {
           line-height 40px
           font-size $font-size-m
       .middle
-        position absolute
-        top 170px
-        bottom 340px
-        left 0
-        right 0
+        position relative
+        flex 1
+        display flex
+        align-items center
         .middle-l
           position relative
           width 100%
-          padding-bottom 80%
+          height 100%
           display flex
-          align-content center
+          align-item center
+          justify-content center
           transition opacity 0s
           .cd-wrap
             position absolute
-            left 10%
-            width 80%
-            height 100%
+            top 50%
+            left 50%
+            width 600px
+            height 600px
+            transform translate(-50%, -50%)
             .cd-border
               position relative
               width 100%
@@ -584,8 +559,6 @@ export default {
                 .cd-slide-img
                   animation rotate 20s linear infinite
           .playing-lyric
-            position absolute
-            bottom -100px
             width 100%
             box-sizing border-box
             text-align center
@@ -608,9 +581,7 @@ export default {
           overflow hidden
           transition transform 0s
       .bottom
-        position absolute
-        bottom 50px
-        width 100%
+        padding-bottom 20px
         .pagination
           height 50px
           text-align center
@@ -664,8 +635,7 @@ export default {
         .operator
           display flex
           align-items center
-          height 100%
-          width 80%
+          justify-content space-between
           margin 0 auto
           .icon
             flex 1
@@ -677,12 +647,6 @@ export default {
               font-size 60px
             .stop-click
               color $greyColor
-          .icon-left
-            text-align left
-          .icon-right
-            text-align right
-          .icon-center
-            padding 0 60px
   @keyframes rotate
     0%
       transform: rotate(0)

@@ -26,6 +26,7 @@ module.exports = {
       .set('api',resolve('src/api'))
   },
   devServer: {
+    host: '192.168.1.2',
     proxy: {
       '/api': {
         target: 'http://101.200.50.231:3000/',

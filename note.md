@@ -245,6 +245,8 @@ searchHistory交给vuex管理，并存入localStorage中
 
 点击歌曲，将歌曲插入播放列表
 
+
+
 # 播放列表的计算
 
 ## 乱序播放
@@ -267,7 +269,14 @@ function shuffle (arr) {
   return arr
 }
 ```
+
+
+
+
+
+
 # 历史记录\播放列表\喜爱列表
+
 存储到localStorage实现  使用good-storage库
 
 ## 播放历史、搜索历史等列表的插入的算法

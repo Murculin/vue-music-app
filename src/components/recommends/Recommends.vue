@@ -117,7 +117,7 @@ export default {
     selectDisc (item) { // 点击歌单跳转页面
       this.setDisc(item)
       this.$router.push({
-        path: `recommends/${item.id}`
+        path: `/recommends/${item.id}`
       })
     },
     ...mapMutations({

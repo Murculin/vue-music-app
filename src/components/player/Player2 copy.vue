@@ -1,5 +1,5 @@
 <template>
-  <div class="player">
+  <div class="player" v-show="playlist.length>0">
     <div class="normal-player" :style="{transform:normalTransform}">
       <div class="background">
         <img :src="currentSong.image">
@@ -87,14 +87,18 @@
 
 <script>
 import { mapGetters, mapMutations, mapActions } from 'vuex'
+import Slidey from 'common/animation/slidey'
 import SlideTop from 'common/animation/slide-top'
 import FadeIn from 'common/animation/fadeIn'
 import Fade from 'common/animation/fade'
+import CirclePro from 'common/circle/circle'
 import Lyric from '../lyric/lyric'
 import Playlist from '../playlist/playlist'
 import { shuffle } from '@/assets/js/util.js'
 import { getLyric } from 'api/song.js'
-import { formatLyrics } from '../../assets/js/util'
+import { Base64 } from 'js-base64'
+import { ERR_OK } from 'api/config.js'
+import { Transform } from 'stream'
 import { Toast } from 'mint-ui'
 
 const BTN_WIDTH = 15
@@ -105,6 +109,7 @@ export default {
   data () {
     return {
       showCD: false,
+      showMini: false,
       showPlaylist: false,
       prevImg: '',
       canClick: true,
@@ -113,7 +118,17 @@ export default {
       btnMove: false,
       btnTouch: {},
       afterTime: 0,
+      miniWidth: 0,
       lyrics: [],
+      currentLyric: {},
+      nextLyric: '',
+      lyricWidth: 0,
+      middleTouch: {
+        x1: 0,
+        x2: 0,
+        disX: 0,
+        translateX: 0
+      },
       isFlip: false,
       duration: '00:00'
     }
@@ -162,12 +177,6 @@ export default {
   },
   created() {
     this.width = 0
-    this.middleTouch = {
-      x1: 0,
-      x2: 0,
-      disX: 0,
-      translateX: 0
-    }
   },
   methods: {
     exitFullScreen () {
@@ -215,7 +224,7 @@ export default {
       }, 1000)
       this.setPlaying(true)
     },
-    canPlay (e) { // audio准备好时的回调函数
+    canPlay (e) { // audio准备好时定的回调函数
       this.duration = e.target.duration
     },
     timeUpdate (e) { // audio播放时的回调函数
@@ -286,7 +295,6 @@ export default {
       this.$refs.progressBtn.style.transform = `translate3d(${offsetX}px,0,0)`
     },
     setPercent () {
-      // 根据进度条设置播放时间
       let percent =  this.$refs.progressCurrent.clientWidth/this.progressWidth
       this.$refs.audio.currentTime = percent * this.duration
     },
@@ -326,7 +334,54 @@ export default {
       getLyric(this.currentSong.id).then((res) => {
         if (res.data.code === 200) {
           let lyrics = res.data.lrc.lyric
-          this.lyrics = formatLyrics(lyrics)
+          this.lyrics = this.formatLyrics(lyrics)
+        }
+      })
+    },
+    formatLyrics (lyrics) {
+      lyrics = lyrics.split('\n')
+      let lyricsArr = []
+      lyrics.forEach((item,index) => {
+        const reg = /\[.+\]/g
+        const timeReg = /\[(\d+:\d+\.\d+)\]/
+        if (item.match(timeReg)){
+          let time = item.match(timeReg)[1]
+          let clause = item.replace(item.match(timeReg)[0],'')
+          let min = parseInt(time.split(':')[0])
+          let sec = parseFloat(time.split(':')[1])
+          time = min*60 + sec
+          let eachLyric = {
+            time,
+            clause
+          }
+          lyricsArr.push(eachLyric)
+        }
+      })
+      for (let i = 0 , len = lyricsArr.length; i < len; i++) {
+        if (lyricsArr[i].clause === '') {
+          lyricsArr.splice(i,1)
+          i--
+          len--
+          continue
+        }
+        let duration = 0
+        if (i < len - 1) {
+          duration = lyricsArr[i + 1].time - lyricsArr[i].time
+        }
+        lyricsArr[i].duration = duration
+        return lyricsArr
+      }
+    },
+    setCurrentLyric () {
+      let currentTime = this.currentTime
+      if (this.lyrics.length === 0) {
+        this.currentLyric = '纯音乐，暂无歌词，请欣赏'
+        return
+      }
+      this.lyrics.some((item,index) => {
+        if (currentTime > item.time) {
+          this.currentLyric = item.clause
+          return true
         }
       })
     },
@@ -409,15 +464,17 @@ export default {
       this.progressWidth = this.$refs.progressBar.clientWidth - BTN_WIDTH
       let offsetX = this.progressWidth * newVal
       if (!this.btnMove) {
-        // 按钮未被拖动才触发
         this.setProgress(offsetX)
       }
+      this.setCurrentLyric()
     }
   },
   components: {
     FadeIn,
     Fade,
+    Slidey,
     SlideTop,
+    CirclePro,
     Lyric,
     Playlist
   }
@@ -604,7 +661,7 @@ export default {
         .operator
           display flex
           align-items center
-          justify-content space-between
+          width 80%
           margin 0 auto
           .icon
             flex 1
@@ -616,6 +673,12 @@ export default {
               font-size 60px
             .stop-click
               color $greyColor
+          .icon-left
+            text-align left
+          .icon-right
+            text-align right
+          .icon-center
+            padding 0 60px
   @keyframes rotate
     0%
       transform: rotate(0)
