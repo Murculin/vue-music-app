@@ -56,9 +56,9 @@ export default {
       discList: [],
       personalizedList: [],
       loaded: false, // 轮播图片是否加载完成
-      page: 1,
       lasttime: 0,
-      isShowLoadMore: false
+      isShowLoadMore: false,
+      loading: false // 是否正在加载
     }
   },
   computed: {
@@ -83,6 +83,7 @@ export default {
     },
     async _getDiscList() {
       const res = await getDiscList(this.lasttime)
+      this.loading = false
       console.log(res)
       if(res.code === 200) {
         this.lasttime = res.lasttime
@@ -103,11 +104,14 @@ export default {
       }
     },
     scrollEnd () { // 监听滚动到底部
+      if(this.loading) {
+        return
+      }
       if(this.discList.length >= 100) {
         this.isShowLoadMore = false
         return
       }
-      this.page += 1
+      this.loading = true
       this._getDiscList()
     },
     selectDisc (item) { // 点击歌单跳转页面

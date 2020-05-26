@@ -7,8 +7,8 @@
     <tab-bar
       class="tab"
       activeColor="#31c27c"
-      backgroundColor="#282c34"
-      textColor="#fff"
+      backgroundColor="#fff"
+      textColor="black"
       :list="tabList"
     ></tab-bar>
     <player></player>

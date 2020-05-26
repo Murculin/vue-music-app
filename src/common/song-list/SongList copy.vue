@@ -93,17 +93,14 @@ export default {
         border-left 5px solid $themeColor
       .content
         line-height 30px
-        flex 1
-        overflow hidden
+        width 100%
         .content-title
-          width 100%
           text-overflow ellipsis
           overflow hidden
           white-space nowrap
           &.active
             color $themeColor
         .desc
-          width 100%
           text-overflow ellipsis
           overflow hidden
           white-space nowrap
@@ -113,7 +110,6 @@ export default {
           &.active
             color $themeColor
       .operate
-        width 50px
         .icon-del
           font-size $font-size-l
 </style>

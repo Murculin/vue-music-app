@@ -37,6 +37,10 @@ export default {
   },
   methods: {
     async _getSingerInfo () {
+      if(!this.singer.id) {
+        this.$router.push('/singer')
+        return
+      }
       const res = await getSingerInfo(this.$route.params.id)
       const songs = res.hotSongs.map(music => {
         return creatSong(music)

@@ -1,5 +1,4 @@
 const path = require('path');
-const axios = require('axios')
 const bodyParser = require('body-parser')
 function resolve (dir) {
   return path.join(__dirname,  dir)
@@ -11,7 +10,7 @@ module.exports = {
     loaderOptions: {
       postcss: {
         plugins: [
-            require('postcss-px2rem-exclude')({remUnit: 37.5, exclude: /node_modules/}), // 换算的基数
+          require('postcss-px2rem-exclude')({remUnit: 37.5, exclude: /node_modules/}), // 换算的基数
         ]
       },
       stylus: {

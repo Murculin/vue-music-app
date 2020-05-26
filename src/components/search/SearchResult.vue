@@ -83,7 +83,6 @@ export default {
       try {
         // 获取歌手列表
         const singers = await getSingers(this.query)
-        console.log(singers)
         this.singers = singers
         // 获取歌曲列表
         this._getSongs()

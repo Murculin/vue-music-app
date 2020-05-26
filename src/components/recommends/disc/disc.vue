@@ -35,6 +35,10 @@ export default {
   },
   methods: {
     async _getDiscDetail () {
+      if(!this.disc.id) {
+        this.$router.push('/recommends')
+        return
+      }
       const res = await getDiscDetail(this.disc.id)
       if(res.code !== 200) {
         return

@@ -26,8 +26,11 @@ export default {
   },
   methods: {
     async _getRankDetail () {
+      if(!this.rank.id) {
+        this.$router.push('/rank')
+        return
+      }
       this.songs = await getRankDetail(this.rank.idx)
-      console.log(this.songs)
     }
   },
   components: {

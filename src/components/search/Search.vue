@@ -70,7 +70,7 @@ export default {
     this.$refs.searchBox.focus()
   },
   computed: {
-    content () { //整个可滚动内容区的数据，传入swiper组件使其正确计算滚动内容高度
+    content () { //整个可滚动内容区的数据，传入scroll组件使其正确计算滚动内容高度
       return this.hotkey.concat(this.setHistory)
     },
     ...mapGetters({
@@ -83,6 +83,11 @@ export default {
       this.hotkey = res.result.hots
     },
     handleClickBack () {
+      if(this.query) {
+        this.query = ''
+        this.addQuery('')
+        return
+      }
       this.$router.back()
     },
     addQuery (query) {
