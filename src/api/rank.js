@@ -3,7 +3,7 @@ import { processSongsUrl } from './music'
 import { creatSong } from '@/assets/js/song'
 
 class RankList {
-  constructor ({id, idx, name, coverImgUrl, tracks, tags}) {
+  constructor ({ id, idx, name, coverImgUrl, tracks, tags }) {
     this.id = id
     this.idx = idx
     this.name = name
@@ -28,13 +28,13 @@ const requestArr = idxArr.map(item => {
 export function getRankListAll () {
   return new Promise((resolve, reject) => {
     axios.all(requestArr)
-    .then(res => {
-      res = res.map((item, index) => {
-        item.data.playlist.idx = idxArr[index]
-        return new RankList(item.data.playlist)
+      .then(res => {
+        res = res.map((item, index) => {
+          item.data.playlist.idx = idxArr[index]
+          return new RankList(item.data.playlist)
+        })
+        resolve(res)
       })
-      resolve(res)
-    })
   })
 }
 

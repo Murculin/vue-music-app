@@ -10,7 +10,7 @@
     >
       <div class="scroll-content">
         <!-- 歌手搜索结果 -->
-        <div class="singer-result" v-show="isShowSinger && singers.length">
+        <div class="singer-result" v-if="isShowSinger && singers.length">
           <h3 class="result-title">歌手</h3>
           <div
             class="singer-item"
@@ -27,7 +27,7 @@
           <h3 class="result-title" v-show="songs.length">单曲</h3>
           <song-list
             :songs="songs"
-            :showPlayAll="true"
+            :showPlayAll="showPlayAll"
             @select="selectSong"
             @playAll="playAll"
           />
@@ -61,6 +61,10 @@ export default {
     isShowSinger: {
       type: Boolean,
       default: true
+    },
+    showPlayAll: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -86,7 +90,7 @@ export default {
         this.singers = singers
         // 获取歌曲列表
         this._getSongs()
-      } catch(e) {
+      } catch (e) {
         // 请求失败，显示对应的ui
         console.log(e)
         this.hasResult = false
@@ -94,7 +98,7 @@ export default {
     },
     async _getSongs () {
       let res = await getResult(this.query, 1, this.page)
-      if(!res.result.songs || res.result.songs.length < 30) {
+      if (!res.result.songs || res.result.songs.length < 30) {
         this.hasMore = false
       }
       let songs = res.result.songs.map(music => createSearchSong(music))
@@ -123,7 +127,7 @@ export default {
       this.$emit('listScroll')
     },
     searchMore () { // 下拉加载更多
-      if(!this.hasMore) {
+      if (!this.hasMore) {
         return
       }
       this.page += 1
@@ -146,7 +150,7 @@ export default {
   },
   watch: {
     query (query) {
-      if(!query) {
+      if (!query) {
         return
       }
       this._getResult()
@@ -163,9 +167,11 @@ export default {
 <style lang="stylus" scoped>
 .search-result
   position absolute
-  top 88px
+  top 0
   bottom 0
   width 100%
+  &.top
+    top 88px
   .scroll-wrapper
     position absolute
     top 0

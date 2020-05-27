@@ -1,5 +1,3 @@
-import axios from 'axios'
-
 export default class Song {
   constructor ({ id, name, singer, album, image, url }) {
     this.id = id

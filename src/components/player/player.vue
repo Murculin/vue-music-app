@@ -32,7 +32,7 @@
           </div>
         </div>
         <div class="middle-r" ref="middleR">
-          <lyric :lyrics="lyrics" :currentTime="currentTime" @setCurrentTime="setCurrentTime">
+          <lyric :lyricLoading="lyricLoading" :lyrics="lyrics" :currentTime="currentTime" @setCurrentTime="setCurrentTime">
           </lyric>
         </div>
       </div>
@@ -41,43 +41,24 @@
           <span class="pagination-item" :class="{active:!isFlip}"></span>
           <span class="pagination-item" :class="{active:isFlip}"></span>
         </div>
-        <div class="progress-wrap">
-          <span class="time currentTime" :class="{active:btnMove}">{{ nowTime }}</span>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar" ref="progressBar" @click="progressClick">
-              <div class="progress-current" ref="progressCurrent"></div>
-              <div
-                class="progress-btn"
-                ref="progressBtn"
-                @touchstart="btnTouchStart"
-                @touchmove="btnTouchMove"
-                @touchend="btnTouchEnd"
-              ></div>
-            </div>
-          </div>
-          <span class="time totalTime">{{ format(duration) }}</span>
-        </div>
-        <div class="operator">
-          <div class="icon icon-left">
-            <i
-              class="iconfont icon-mode"
-              v-html="iconMode"
-              @click="nextMode"
-            ></i>
-          </div>
-          <div class="icon icon-right">
-            <i class="iconfont icon-prev" :class="{'stop-click':!canClick}" @click="prevSong">&#xe607;</i>
-          </div>
-          <div class="icon icon-center">
-            <i class="iconfont icon-play" v-html="setPlayIcon" @click="togglePlaying"></i>
-          </div>
-          <div class="icon icon-left">
-            <i class="iconfont icon-next" :class="{'stop-click':!canClick}" @click="nextSong">&#xe606;</i>
-          </div>
-          <div class="icon icon-right" @click="openPlaylist">
-            <i class="iconfont">&#xe640;</i>
-          </div>
-        </div>
+        <Progress
+          ref="progress"
+          :currentTime="currentTime"
+          :duration="duration"
+          :playing="playing"
+          @progressSetCurrent="progressSetCurrent"
+          @btnMoveChange="getBtnMove"
+        ></Progress>
+        <operator
+          :playIcon="playIcon"
+          :canClick="canClick"
+          :iconMode="iconMode"
+          @nextMode="nextMode"
+          @prevSong="prevSong"
+          @togglePlaying="togglePlaying"
+          @nextSong="nextSong"
+          @openPlaylist="openPlaylist"
+        ></operator>
       </div>
     </div>
     <playlist ref="playlist" @toggleMode='nextMode' @hidePlaylist="hidePlaylist"></playlist>
@@ -89,33 +70,28 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import SlideTop from 'common/animation/slide-top'
 import FadeIn from 'common/animation/fadeIn'
-import Fade from 'common/animation/fade'
-import Lyric from '../lyric/lyric'
-import Playlist from '../playlist/playlist'
+import Playlist from './Playlist'
+import Operator from './Operator'
+import Progress from './Progress'
+import Lyric from './Lyric'
 import { shuffle } from '@/assets/js/util.js'
 import { getLyric } from 'api/song.js'
 import { formatLyrics } from '../../assets/js/util'
 import { Toast } from 'mint-ui'
 
-const BTN_WIDTH = 15
-let calculated = false
-
 export default {
-  name: 'Player',
   data () {
     return {
       showCD: false,
       showPlaylist: false,
       prevImg: '',
       canClick: true,
-      progressWidth: 0,
       currentTime: 0,
       btnMove: false,
-      btnTouch: {},
-      afterTime: 0,
       lyrics: [],
+      lyricLoading: false,
       isFlip: false,
-      duration: '00:00'
+      duration: 0
     }
   },
   computed: {
@@ -123,7 +99,7 @@ export default {
       let transform = this.fullScreen ? 0 : 120
       return `translate3d(0,${transform}%,0)`
     },
-    setPlayIcon () {
+    playIcon () {
       return this.playing ? '&#xe629;' : '&#xe625;'
     },
     cdStyle () {
@@ -141,13 +117,6 @@ export default {
     percent () {
       return this.currentTime / this.duration
     },
-    nowTime () {
-      if (this.btnMove) {
-        return this.format(this.afterTime)
-      } else {
-        return this.format(this.currentTime)
-      }
-    },
     ...mapGetters(
       {
         fullScreen: 'getFullScreen',
@@ -160,14 +129,16 @@ export default {
       }
     )
   },
-  created() {
-    this.width = 0
+  created () {
     this.middleTouch = {
       x1: 0,
       x2: 0,
       disX: 0,
       translateX: 0
     }
+  },
+  mounted () {
+    this.width = this.$refs.middleR.clientWidth
   },
   methods: {
     exitFullScreen () {
@@ -185,8 +156,8 @@ export default {
       }
       this.setCanClick()
       if (this.currentIndex === 0) {
-        this.setCurrentIndex(this.playlist.length-1)
-      } else {     
+        this.setCurrentIndex(this.playlist.length - 1)
+      } else {
         this.setCurrentIndex(this.currentIndex - 1)
       }
     },
@@ -195,9 +166,9 @@ export default {
         return
       }
       this.setCanClick()
-      if (this.currentIndex === this.playlist.length-1) {
+      if (this.currentIndex === this.playlist.length - 1) {
         this.setCurrentIndex(0)
-      } else {     
+      } else {
         this.setCurrentIndex(this.currentIndex + 1)
       }
     },
@@ -229,69 +200,19 @@ export default {
         this.nextSong()
       }
     },
-    format (time) { // 格式化时间
-      let ret = Math.floor(time)
-      let min = Math.floor(ret/60)
-      let sec = ret%60
-      min = min<10 ? '0'+min : min
-      sec = sec<10 ? '0'+sec : sec
-      return `${min}:${sec}`
-    },
-    //进度条相关
-    btnTouchStart (e) {
-      this.btnMove = true
-      let firstTouch = e.touches[0]
-      this.btnTouch.x1 = firstTouch.pageX
-      this.btnTouch.left = this.$refs.progressCurrent.clientWidth
-    },
-    btnTouchMove (e) {
-      if (!this.btnMove) {
-        return
-      }
-      let firstTouch = e.touches[0]
-      this.btnTouch.x2 = firstTouch.pageX
-      let disX = this.btnTouch.x2 - this.btnTouch.x1
-      let offsetX = this.btnTouch.left + disX
-      if (offsetX<0) {
-        offsetX = 0
-      } else if (offsetX > this.progressWidth) {
-        offsetX = this.progressWidth
-      }
-      this.setProgress(offsetX)
-      let percent =  this.$refs.progressCurrent.clientWidth/this.progressWidth
-      this.afterTime = percent * this.duration
-    },
-    btnTouchEnd (e) {
-      this.btnMove = false
-      this.setPercent()
-      if (!this.playing) {
-        this.setPlaying(true)
-      }
-    },
-    progressClick (e) {
-      let offsetX = e.pageX - this.$refs.progressBar.offsetLeft
-      if (offsetX<0) {
-        offsetX = 0
-      } else if (offsetX > this.progressWidth) {
-        offsetX = this.progressWidth
-      }
-      this.setProgress(offsetX)
-      this.setPercent()
-      if (!this.playing) {
-        this.setPlaying(true)
-      }
-    },
-    setProgress (offsetX) {
-      this.$refs.progressCurrent.style.width = offsetX + 'px'
-      this.$refs.progressBtn.style.transform = `translate3d(${offsetX}px,0,0)`
-    },
-    setPercent () {
-      // 根据进度条设置播放时间
-      let percent =  this.$refs.progressCurrent.clientWidth/this.progressWidth
-      this.$refs.audio.currentTime = percent * this.duration
-    },
     setCurrentTime (time) {
       this.$refs.audio.currentTime = time
+      if (!this.playing) {
+        this.setPlaying(true)
+      }
+    },
+    // 进度条
+    getBtnMove (val) {
+      this.btnMove = val
+    },
+    // 由进度条控制播放进度
+    progressSetCurrent (percent) {
+      this.$refs.audio.currentTime = percent * this.duration
     },
     // 切换模式
     nextMode () {
@@ -322,17 +243,32 @@ export default {
       })
       this.setCurrentIndex(index)
     },
+    // 发送请求获取歌词
     setLyric () {
+      this.lyricLoading = true
       getLyric(this.currentSong.id).then((res) => {
         if (res.data.code === 200) {
+          console.log(res)
+          if (res.data.nolyric) { // 没歌词
+            this.lyric = [{
+              clause: '纯音乐,请欣赏',
+              time: 0
+            }]
+            this.lyricLoading = false
+            return
+          }
           let lyrics = res.data.lrc.lyric
           this.lyrics = formatLyrics(lyrics)
+          this.lyricLoading = false
         }
+      }).catch((err) => {
+        this.lyricLoading = false
+        console.log(err)
       })
     },
     // 滑动部分
     middleTouchStart (e) {
-      this.width = this.$refs.middleR.clientWidth
+      this.$refs.middleL.style.backgroundColor = 'white'
       let firstTouch = e.touches[0]
       this.middleTouch.x1 = firstTouch.pageX
       this.middleTouch.y1 = firstTouch.pageY
@@ -348,29 +284,28 @@ export default {
         return
       }
       this.middleTouch.disX = disX
+      this.middleTouch.disY = disY
       let offsetX = this.middleTouch.translateX + this.middleTouch.disX
       offsetX = offsetX > 0 ? 0 : offsetX
       offsetX = offsetX + this.width > 0 ? offsetX : -this.width
-      this.$refs.middleL.style.opacity = 1 - Math.abs(offsetX/this.width)
+      this.middleTouch.offsetX = offsetX
+      this.$refs.middleL.style.opacity = 1 - Math.abs(offsetX / this.width)
       this.$refs.middleR.style.transform = `translate3d(${offsetX}px,0,0)`
     },
     middleTouchEnd (e) {
       this.$refs.middleL.style.transitionDuration = this.$refs.middleR.style.transitionDuration = 0.5 + 's'
-      let offsetX = 0
-      let disX = this.middleTouch.disX
-      if (disX < -this.width/4 || (disX > 0 && disX < this.width / 4)) {
-        this.$refs.middleR.style.transform = `translate3d(${-this.width}px,0,0)`
-        this.middleTouch.translateX = -this.width
-        this.isFlip = true
-        this.$refs.middleL.style.opacity = 0
-      } else {
-        if (this.middleTouch.translateX + disX < -this.width) {
-          return
-        }
+      let { offsetX, disX } = this.middleTouch
+      offsetX = Math.abs(offsetX)
+      if ((disX > 0 && offsetX < 3 * this.width / 4) || (disX < 0 && offsetX < this.width / 4) ) {
         this.$refs.middleR.style.transform = `translate3d(0,0,0)`
         this.middleTouch.translateX = 0
         this.isFlip = false
         this.$refs.middleL.style.opacity = 1
+      } else {
+        this.$refs.middleR.style.transform = `translate3d(${-this.width}px,0,0)`
+        this.middleTouch.translateX = -this.width
+        this.isFlip = true
+        this.$refs.middleL.style.opacity = 0
       }
     },
     ...mapMutations({
@@ -385,7 +320,7 @@ export default {
     })
   },
   watch: {
-    currentSong (newVal,oldVal) {
+    currentSong (newVal, oldVal) {
       if (newVal.id === oldVal.id) {
         return
       }
@@ -405,21 +340,20 @@ export default {
         newVal ? this.$refs.audio.play() : this.$refs.audio.pause()
       })
     },
-    percent (newVal) {
-      this.progressWidth = this.$refs.progressBar.clientWidth - BTN_WIDTH
-      let offsetX = this.progressWidth * newVal
+    percent (val) {
       if (!this.btnMove) {
         // 按钮未被拖动才触发
-        this.setProgress(offsetX)
+        this.$refs.progress.setProgressByPercent(val)
       }
     }
   },
   components: {
     FadeIn,
-    Fade,
     SlideTop,
     Lyric,
-    Playlist
+    Playlist,
+    Operator,
+    Progress
   }
 
 }
@@ -527,20 +461,6 @@ export default {
                 top 0
                 .cd-slide-img
                   animation rotate 20s linear infinite
-          .playing-lyric
-            width 100%
-            box-sizing border-box
-            text-align center
-            padding-left 10%
-            padding-right 10%
-            .playing-lyric-content
-              overflow hidden
-              white-space nowrap
-              text-overflow ellipsis
-              height 40px
-              line-height 40px
-              font-size $font-size-m
-              color rgba(255,255,255,0.5)
         .middle-r
           position absolute
           top 0
@@ -564,58 +484,6 @@ export default {
               margin-left 16px
             &.active
               background rgba(255,255,255,0.8)
-        .progress-wrap
-          width 90%
-          margin 0 auto
-          padding 20px 0
-          display flex
-          align-items center
-          height 60px
-          .time
-            flex 0,0,60px
-            width 60px
-            color $activeColor
-            font-size $font-size-s
-            line-height 30px
-            &.active
-              font-size $font-size-m
-          .progress-bar-wrap
-            flex 1
-            height 60px
-            padding 0 20px
-            .progress-bar
-              position relative
-              width 100%
-              height 6px
-              top 26px
-              background $greyColor
-              .progress-current
-                position relative
-                width 0
-                height 100%
-                background $themeColor
-              .progress-btn
-                position absolute
-                width 30px
-                height 30px
-                border-radius 50%
-                background $activeColor
-                top -12px
-        .operator
-          display flex
-          align-items center
-          justify-content space-between
-          margin 0 auto
-          .icon
-            flex 1
-            text-align center
-            color $activeColor
-            .icon-play
-              font-size 88px
-            i
-              font-size 60px
-            .stop-click
-              color $greyColor
   @keyframes rotate
     0%
       transform: rotate(0)

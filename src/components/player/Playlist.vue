@@ -17,7 +17,7 @@
             class="list-content"
             :data="sequenceList"
             ref="listContent"
-            :refreshDelay="refreshDelay"          
+            :refreshDelay="refreshDelay"
           >
             <transition-group name="list" tag="ul">
               <li
@@ -54,14 +54,14 @@
 import Scroll from 'common/scroll'
 import Fade from 'common/animation/fade'
 import SlideBottom from 'common/animation/slide-bottom'
-import AddList from '../add-list/add-list'
-import {mapGetters,mapMutations,mapActions} from 'vuex'
+import AddList from './add-list/AddList'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { MessageBox } from 'mint-ui'
-import {favoriteMixin} from '@/assets/js/mixin'
+import { favoriteMixin } from '@/assets/js/mixin'
 export default {
   mixins: [favoriteMixin],
   name: 'Playlist',
-  data() {
+  data () {
     return {
       isShow: false,
       refreshDelay: 100
@@ -107,15 +107,15 @@ export default {
       setTimeout(() => {
         this.$refs.listContent.refresh()
         this.scrollToCurrent(this.currentSong)
-      }, 20);
+      }, 20)
     },
     hide () {
       this.isShow = false
       this.$emit('hidePlaylist')
     },
-    selectItem (item,index) {
+    selectItem (item, index) {
       if (this.mode === 2) {
-        //找到playlist中对应歌曲的index
+        // 找到playlist中对应歌曲的index
         index = this.playlist.findIndex((song) => {
           return song.id === item.id
         })
@@ -123,14 +123,14 @@ export default {
       this.setCurrentIndex(index)
       this.setPlayingState(true)
     },
-    deleteItem (item,index) {
+    deleteItem (item, index) {
       this.deleteSong(item)
     },
     clearAll () {
       MessageBox.confirm('确定执行此操作?').then(() => {
         this.clearSongList()
         this.hide()
-      }) 
+      })
     },
     toggleMode () {
       this.$emit('toggleMode')
@@ -138,12 +138,12 @@ export default {
     selectAddList () {
       this.$refs.addList.show()
     },
-    scrollToCurrent (current) { //打开列表时滚动到播放的歌曲
+    scrollToCurrent (current) { // 打开列表时滚动到播放的歌曲
       let index = this.sequenceList.findIndex((song) => {
         return song.id === current.id
       })
-      index = index < 3 ? 0 : index-3
-      this.$refs.listContent.scrollToElement(this.$refs.listItem[index],300)
+      index = index < 3 ? 0 : index - 3
+      this.$refs.listContent.scrollToElement(this.$refs.listItem[index], 300)
     },
     ...mapMutations({
       setCurrentIndex: 'SET_CURRENT_INDEX',
@@ -180,9 +180,6 @@ export default {
       bottom 0
       background rgba(0,0,0,.8)
       color $activeColor
-      &.mini
-        background $activeColor
-        color black
       .list-header
         padding 40px 40px 20px 40px
         display flex

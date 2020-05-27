@@ -24,7 +24,7 @@
     <scroll class="scroll-wrapper">
       <div class="scroll-content">
         <search-history
-          v-show="!query" 
+          v-show="!query"
           :list="searchHistory"
           @selectHistory="addQuery"
           @clearHistory="clearHistory"
@@ -37,6 +37,7 @@
       :query="query"
       @listScroll="listScroll"
       @setHistory="setHistory"
+      class="result"
     />
     <slide>
       <router-view></router-view>
@@ -50,11 +51,11 @@ import PlayerIcon from 'common/player-icon/PlayerIcon'
 import SearchBox from 'common/search-box/SearchBox'
 import SearchHistory from './SearchHistory'
 import SearchHotKey from './SearchHotKey'
-import SearchResult from './SearchResult'
+import SearchResult from 'common/search-result/SearchResult'
 import Slide from 'common/animation/slide'
 import Scroll from 'common/scroll'
-import {getHotKey} from 'api/search'
-import {mapGetters,mapActions} from 'vuex'
+import { getHotKey } from 'api/search'
+import { mapGetters, mapActions } from 'vuex'
 import { MessageBox } from 'mint-ui'
 export default {
   data () {
@@ -70,20 +71,20 @@ export default {
     this.$refs.searchBox.focus()
   },
   computed: {
-    content () { //整个可滚动内容区的数据，传入scroll组件使其正确计算滚动内容高度
+    content () { // 整个可滚动内容区的数据，传入scroll组件使其正确计算滚动内容高度
       return this.hotkey.concat(this.setHistory)
     },
     ...mapGetters({
       searchHistory: 'getSearchHistory'
     })
   },
-  methods : {
+  methods: {
     async _getHotKey () {
       const res = await getHotKey()
       this.hotkey = res.result.hots
     },
     handleClickBack () {
-      if(this.query) {
+      if (this.query) {
         this.query = ''
         this.addQuery('')
         return
@@ -93,7 +94,7 @@ export default {
     addQuery (query) {
       this.$refs.searchBox.setQuery(query)
     },
-    onQueryChange(query) {
+    onQueryChange (query) {
       this.query = query
     },
     setHistory () {
@@ -126,7 +127,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '~styles/variable.styl'
 .search
   position absolute
   width 100%
@@ -147,4 +147,7 @@ export default {
     bottom 0
     left 0
     right 0
+  .result
+    position absolute
+    top 88px
 </style>

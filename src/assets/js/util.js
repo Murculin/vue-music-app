@@ -14,7 +14,7 @@ export function shuffle (arr) {
   return _arr
 }
 
-// 节流
+// 防抖
 export function debounce (func, delay) {
   let timer
   return function (...args) {
@@ -31,15 +31,14 @@ export function debounce (func, delay) {
 export function formatLyrics (lyrics) {
   lyrics = lyrics.split('\n')
   let lyricsArr = []
-  lyrics.forEach((item,index) => {
-    const reg = /\[.+\]/g
+  lyrics.forEach(item => {
     const timeReg = /\[(\d+:\d+\.\d+)\]/
-    if (item.match(timeReg)){
+    if (item.match(timeReg)) {
       let time = item.match(timeReg)[1]
-      let clause = item.replace(item.match(timeReg)[0],'')
+      let clause = item.replace(item.match(timeReg)[0], '')
       let min = parseInt(time.split(':')[0])
       let sec = parseFloat(time.split(':')[1])
-      time = min*60 + sec
+      time = min * 60 + sec
       let eachLyric = {
         time,
         clause
@@ -47,18 +46,5 @@ export function formatLyrics (lyrics) {
       lyricsArr.push(eachLyric)
     }
   })
-  for (let i = 0 , len = lyricsArr.length; i < len; i++) {
-    if (lyricsArr[i].clause === '') {
-      lyricsArr.splice(i,1)
-      i--
-      len--
-      continue
-    }
-    let duration = 0
-    if (i < len - 1) {
-      duration = lyricsArr[i + 1].time - lyricsArr[i].time
-    }
-    lyricsArr[i].duration = duration
-    return lyricsArr
-  }
+  return lyricsArr
 }

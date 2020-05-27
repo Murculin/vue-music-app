@@ -13,7 +13,7 @@ import './assets/styles/border.css'
 import './util/rem.js'
 import 'swiper/dist/css/swiper.css'
 import './assets/styles/iconfont/iconfont.css'
-import "./assets/styles/variable.styl"
+import './assets/styles/variable.styl'
 
 Vue.config.productionTip = false
 fastClick.attach(document.body)
@@ -28,12 +28,21 @@ Vue.filter('formatCount', (count) => {
   if (count.length > 8) {
     const i = count.length - 8
     return count.slice(0, i).join('') + '亿'
-  } else if(count.length > 4) {
+  } else if (count.length > 4) {
     const i = count.length - 4
     return count.slice(0, i).join('') + '万'
   } else {
     return count.join('')
   }
+})
+// 格式化时间
+Vue.filter('formatTime', (time) => {
+  let ret = Math.floor(time)
+  let min = Math.floor(ret / 60)
+  let sec = ret % 60
+  min = min < 10 ? '0' + min : min
+  sec = sec < 10 ? '0' + sec : sec
+  return `${min}:${sec}`
 })
 
 Vue.use(MintUI)

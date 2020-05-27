@@ -10,6 +10,9 @@
       <img v-lazy="item.picUrl" class="avatar">
       <span class="name">{{ item.name }}</span>
     </li>
+    <div v-show="!list.length" class="loading-container">
+      <loading></loading>
+    </div>
   </div>
 </template>
 
@@ -40,6 +43,8 @@ export default {
 <style lang="stylus" scoped>
 .singer-list
   padding-bottom 30px
+  position relative
+  min-height 300px
   .list-title
     height 60px
     line-height 60px
@@ -59,4 +64,9 @@ export default {
       line-height 100px
       margin-left 30px
       font-size $font-size-m
+  .loading-container
+    position absolute
+    width 100%
+    top 50%
+    transform translateY(-50%)
 </style>

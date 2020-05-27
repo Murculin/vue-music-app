@@ -3,7 +3,7 @@
     <div class="item-left">
       <h2 class="rank-item-title">{{rankInfo.name}}</h2>
       <ul class="song-list">
-        <li 
+        <li
           class="song"
           v-for="(song,index) in rankInfo.hotList"
           :key="index"

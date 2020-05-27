@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const debug = process.env.NODE_ENV !== 'production'
 
-export function getSwiperList() {
+export function getSwiperList () {
   return new Promise((resolve, reject) => {
     axios.get('api/banner').then((res) => {
       resolve(res.data)
@@ -11,7 +11,7 @@ export function getSwiperList() {
 }
 
 const limit = 30
-export function getDiscList(lasttime) {
+export function getDiscList (lasttime) {
   return new Promise((resolve, reject) => {
     axios.get(`api/top/playlist/highquality`, {
       params: {
@@ -24,7 +24,7 @@ export function getDiscList(lasttime) {
   })
 }
 
-export function getPersonalized() {
+export function getPersonalized () {
   return new Promise((resolve, reject) => {
     axios.get('api/personalized').then((res) => {
       resolve(res.data)
@@ -32,7 +32,7 @@ export function getPersonalized() {
   })
 }
 
-export function getDiscDetail(id) {
+export function getDiscDetail (id) {
   return new Promise((resolve, reject) => {
     const url = 'api/playlist/detail'
     axios.get(url, {

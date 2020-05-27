@@ -13,7 +13,7 @@
           :list="singerList"
           :listTitle="listTitle"
         />
-        <loading v-show="isShowLoadMore" title="正在加载"/>
+        <loading v-show="isShowLoadMore && singerList.length" title="正在加载"/>
       </div>
     </scroll>
     <slide>
@@ -24,7 +24,6 @@
 
 <script>
 import { getSingerList } from 'api/singer.js'
-import Singer from 'common/js/singer.js'
 import Scroll from 'common/scroll'
 import Slide from 'common/animation/slide'
 import Loading from 'common/loading/loading'
@@ -55,12 +54,14 @@ export default {
   methods: {
     async _getSingerList () {
       const res = await getSingerList(this.onCode, this.page)
-      if(!res.more) {
+      if (!res.more) {
         this.isShowLoadMore = false
         return
       }
       this.singerList = res.artists
-      this.isShowLoadMore = true
+      this.$nextTick(() => {
+        this.isShowLoadMore = true
+      })
     },
     selectItem (singer) {
       this.setSinger(singer)
@@ -69,7 +70,7 @@ export default {
       })
     },
     selectCate (code, title) {
-      if(this.onCode === code) {
+      if (this.onCode === code) {
         return
       }
       // 歌手列表的标题
@@ -82,7 +83,7 @@ export default {
       this.isShowLoadMore = true
       this._getSingerList()
     },
-    scrollEnd() {
+    scrollEnd () {
       this.page += 1
       this._getSingerList()
     },

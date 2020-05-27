@@ -16,7 +16,7 @@ export default {
       rank: 'getRank'
     })
   },
-  data() {
+  data () {
     return {
       songs: []
     }
@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     async _getRankDetail () {
-      if(!this.rank.id) {
+      if (!this.rank.id) {
         this.$router.push('/rank')
         return
       }

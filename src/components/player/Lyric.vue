@@ -6,14 +6,14 @@
     @touchend="lyricTouchEnd"
   >
     <scroll
-    class="scroll-wrap"
-    ref="lyricScroll"
-    :data="lyrics"
-    :listenScroll="listenScroll"
-    :probeType="probeType"
-    @scroll="scroll"
+      class="scroll-wrap"
+      ref="lyricScroll"
+      :data="lyrics"
+      :listenScroll="true"
+      :probeType="probeType"
+      @scroll="scroll"
     >
-      <div class="lyric-wrap">
+      <div class="lyric-wrap" ref="lyricContent">
         <p
           class="lyric-line"
           :class="lyricClass(index)"
@@ -33,7 +33,7 @@
         </div>
         <div class="time-line-linenar"></div>
         <span class="time-line-time" @click="setCurrentTime">
-          {{ nextLyricTime }}
+          {{ nextLyricTime | formatTime }}
         </span>
       </div>
     </transition>
@@ -43,31 +43,32 @@
 <script>
 import Scroll from 'common/scroll'
 
-const PADDING_TOP = 200
+const ITEM_HEIGHT = 30
 export default {
   name: 'Lyric',
   props: {
     lyrics: {
       type: Array,
-      default: []
+      default: () => []
     },
     currentTime: {
       type: Number,
       default: 0
+    },
+    lyricLoading: {
+      type: Boolean,
+      default: false
     }
   },
-  data() {
+  data () {
     return {
-      listenScroll: true,
       probeType: 3,
       scrollY: -1,
       onIndex: 0,
       nextIndex: 0,
       currentLyric: {},
-      padding: 200,
       autoplay: true,
       showTimeLine: false,
-      positionList: [],
       touch: {}
     }
   },
@@ -76,19 +77,19 @@ export default {
   },
   computed: {
     nextLyricTime () {
-      if (!this.lyrics||!this.nextIndex) {
-        return '00:00'
+      if (this.lyricLoading || !this.lyrics[this.nextIndex]) {
+        return 0
       }
       let time = this.lyrics[this.nextIndex].time
-      let min = Math.floor(time/60)
-      let sec = Math.floor(time%60)
-      min = min < 10 ? '0' + min : min
-      sec = sec < 10 ? '0' + sec : sec
-      return `${min}:${sec}`
+      return time
     }
   },
-  created() {
+  created () {
     this.timer = 0
+  },
+  mounted () {
+    this.defaultPadding = this.$refs.lyricScroll.$el.clientHeight / 2
+    this.$refs.lyricContent.style.paddingBottom = this.$refs.lyricContent.style.paddingTop = this.defaultPadding + 'px'
   },
   methods: {
     lyricTouchStart (e) {
@@ -106,7 +107,7 @@ export default {
       this.touch.y2 = firstTouch.pageY
       const disX = this.touch.x2 - this.touch.x1
       const disY = this.touch.y2 - this.touch.y1
-      if (Math.abs(disY)>Math.abs(disX)&&Math.abs(disY)>15) {
+      if (Math.abs(disY) > Math.abs(disX) && Math.abs(disY) > 15) {
         this.showTimeLine = true
       }
     },
@@ -126,40 +127,33 @@ export default {
       this.scrollY = pos.y
     },
     setCurrentLyric () {
-      this.lyrics.forEach((item,index) => {
-        if (this.currentTime > item.time) {
+      for (let i = 0; i < this.lyrics.length; i++) {
+        const item = this.lyrics[i]
+        if (i === this.lyrics.length - 1) {
           this.currentLyric = item
-          this.onIndex = index
+          this.onIndex = i
           return
         }
-      })
+        if (this.currentTime > item.time && this.currentTime < this.lyrics[i + 1].time) {
+          this.currentLyric = item
+          this.onIndex = i
+          return
+        }
+      }
     },
     startAutoplay () {
-      let offsetY = this.padding - this.$refs.lyricGroup[this.onIndex].offsetTop
-      this.$refs.lyricScroll.scrollTo(0,offsetY,700)
+      let offsetY = this.defaultPadding - this.$refs.lyricGroup[this.onIndex].offsetTop - ITEM_HEIGHT / 2
+      this.$refs.lyricScroll.scrollTo(0, offsetY, 700)
     },
     setCurrentTime () {
-      this.$emit('setCurrentTime',this.lyrics[this.nextIndex].time)
+      this.$emit('setCurrentTime', this.lyrics[this.nextIndex].time)
     }
   },
   watch: {
-    lyrics (lyrics) {
-      if (lyrics.length===0) {
-        return
-      }
-      this.$nextTick(() => {
-        let ret = []
-        this.padding = this.$refs.lyricGroup[0].offsetTop
-        this.$refs.lyricGroup.forEach((item,index) => {
-          ret.push(item.offsetTop - item.clientHeight/2)
-        })
-        this.positionList = ret
-      })
-    },
     currentTime () {
       this.setCurrentLyric()
     },
-    currentLyric (newVal,oldVal) {
+    currentLyric (newVal, oldVal) {
       if (oldVal && oldVal.clause === newVal.clause) {
         return
       }
@@ -168,13 +162,10 @@ export default {
       }
     },
     scrollY (val) {
-      this.positionList.forEach((item,index) => {
-        let position = item - this.padding
-        if (val + position < 0) {
-          this.nextIndex = index
-          return
-        }
-      })
+      if (val > 0) {
+        return
+      }
+      this.nextIndex = Math.floor(-val / ITEM_HEIGHT)
     }
   }
 }
@@ -185,10 +176,10 @@ export default {
   .lyric
     width 100%
     height 100%
+    position relative
     .scroll-wrap
       height 100%
       .lyric-wrap
-        padding 400px 0
         width 80%
         margin 0 auto
         text-align center
@@ -197,15 +188,16 @@ export default {
           overflow hidden
           font-size $font-size-m
           color rgba(255,255,255,0.7)
-          line-height 60px
-          height 60px
+          line-height 30PX
+          height 30PX
           &.next
             color $activeColor
           &.active
             color $themeColor
     .time-line
       position absolute
-      top 425px
+      top 50%
+      transform translateY(-50%)
       height 3px
       width 100%
       padding 0 20px

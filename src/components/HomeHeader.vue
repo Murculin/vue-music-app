@@ -8,10 +8,16 @@
         <h2 class="home-title">{{ homeTitle }}</h2>
       </template>
       <template v-slot:center>
-        <search-box
-          class="input"
-          @click.native.stop.prevent="handleClickInput"
-        />
+        <div class="center">
+          <search-box
+            class="input"
+          />
+          <div
+            class="click-wrap"
+            @click.stop.prevent="handleClickInput"
+            v-show="showClickWrap"
+          ></div>
+        </div>
       </template>
       <template v-slot:right>
         <player-icon defaultColor="black"/>
@@ -33,10 +39,14 @@ export default {
   computed: {
     homeTitle () {
       return this.$route.name
+    },
+    showClickWrap () {
+      return true
     }
   },
   methods: {
     handleClickInput () {
+      console.log(this.$route.path)
       this.$router.push('/search')
     }
   }
@@ -45,9 +55,17 @@ export default {
 
 <style lang="stylus" scoped>
 @import "~styles/variable.styl"
-.input
-  margin-top 44px
-  transform translateY(-50%)
+.center
+  position relative
+  .click-wrap
+    position absolute
+    top 0
+    bottom 0
+    width 100%
+    z-index 100
+  .input
+    margin-top 44px
+    transform translateY(-50%)
 .home-title
   color black
   font-weight bold

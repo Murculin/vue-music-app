@@ -16,6 +16,7 @@
           :list="personalizedList"
           title="为您推荐"
           @selectItem="selectDisc"
+          class="scroll-row-list"
         />
         <recommend-disc
           :list="discList"
@@ -77,15 +78,15 @@ export default {
   methods: {
     async _getSwiperList () {
       const res = await getSwiperList()
-      if(res.code === 200) {
+      if (res.code === 200) {
         this.swiperList = res.banners
       }
     },
-    async _getDiscList() {
+    async _getDiscList () {
       const res = await getDiscList(this.lasttime)
       this.loading = false
       console.log(res)
-      if(res.code === 200) {
+      if (res.code === 200) {
         this.lasttime = res.lasttime
         this.discList = this.discList.concat(res.playlists)
         this.isShowLoadMore = true
@@ -93,21 +94,21 @@ export default {
     },
     async _getPersonalized () {
       const res = await getPersonalized()
-      if(res.code === 200) {
+      if (res.code === 200) {
         this.personalizedList = res.result.slice(0, 6)
       }
     },
     imgLoaded () { // 图片加载完后刷新滚动
-      if(!this.loaded) {
-        this.loaded =true
+      if (!this.loaded) {
+        this.loaded = true
         this.$refs.scroll.refresh()
       }
     },
     scrollEnd () { // 监听滚动到底部
-      if(this.loading) {
+      if (this.loading) {
         return
       }
-      if(this.discList.length >= 100) {
+      if (this.discList.length >= 100) {
         this.isShowLoadMore = false
         return
       }
@@ -140,4 +141,6 @@ export default {
       top 0
       bottom 88px
       width 100%
+      .scroll-row-list
+        min-height 320px
 </style>

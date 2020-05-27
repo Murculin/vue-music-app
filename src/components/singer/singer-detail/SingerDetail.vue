@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     async _getSingerInfo () {
-      if(!this.singer.id) {
+      if (!this.singer.id) {
         this.$router.push('/singer')
         return
       }

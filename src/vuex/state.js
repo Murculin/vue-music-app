@@ -11,6 +11,6 @@ export default {
   disc: {},
   rank: {},
   searchHistory: loadSearch(), // 搜索历史
-  playHistory: loadPlay(),   //  播放历史
+  playHistory: loadPlay(), //  播放历史
   favoriteList: loadFavorite() // 喜爱歌曲列表
 }

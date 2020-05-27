@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
+import { mapGetters } from 'vuex'
 export default {
   name: 'SongList',
   data () {
@@ -36,14 +36,14 @@ export default {
   props: {
     songs: {
       type: Array,
-      default: []
+      default: () => []
     },
     showPlayAll: {
-      type:Boolean,
+      type: Boolean,
       default: true
     },
     showOperate: {
-      type:Boolean,
+      type: Boolean,
       default: false
     }
   },
@@ -53,17 +53,17 @@ export default {
     })
   },
   methods: {
-    selectItem (item,index) {
-      this.$emit('select',item,index)
+    selectItem (item, index) {
+      this.$emit('select', item, index)
     },
     selectPlayAll () {
       this.$emit('playAll')
     },
     deleteItem (song) {
-      this.$emit('deleteItem',song)
+      this.$emit('deleteItem', song)
     },
     isActive (item) {
-      return (this.showPlayAll && item.id === this.currentSong.id) ? true : false
+      return (this.showPlayAll && item.id === this.currentSong.id)
     }
   }
 }
