@@ -1,7 +1,7 @@
-import axios from 'axios'
+import axios from './axios'
 // 获取列表中所有歌曲的url
 export function processSongsUrl (songs) {
-  const url = 'api/song/url'
+  const url = '/song/url'
   // 获取id数组
   const ids = songs.map((song) => {
     return song.id
@@ -27,5 +27,17 @@ export function processSongsUrl (songs) {
           resolve(songs)
         }
       })
+  })
+}
+
+// 获取歌词
+export function getLyric (id) {
+  const url = '/lyric'
+  return axios.get(url, {
+    params: {
+      id
+    }
+  }).then((res) => {
+    return Promise.resolve(res)
   })
 }

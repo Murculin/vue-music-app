@@ -75,7 +75,7 @@ import Operator from './Operator'
 import Progress from './Progress'
 import Lyric from './Lyric'
 import { shuffle } from '@/assets/js/util.js'
-import { getLyric } from 'api/song.js'
+import { getLyric } from 'api/music.js'
 import { formatLyrics } from '../../assets/js/util'
 import { Toast } from 'mint-ui'
 
@@ -248,7 +248,6 @@ export default {
       this.lyricLoading = true
       getLyric(this.currentSong.id).then((res) => {
         if (res.data.code === 200) {
-          console.log(res)
           if (res.data.nolyric) { // 没歌词
             this.lyric = [{
               clause: '纯音乐,请欣赏',
@@ -268,7 +267,6 @@ export default {
     },
     // 滑动部分
     middleTouchStart (e) {
-      this.$refs.middleL.style.backgroundColor = 'white'
       let firstTouch = e.touches[0]
       this.middleTouch.x1 = firstTouch.pageX
       this.middleTouch.y1 = firstTouch.pageY

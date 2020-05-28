@@ -5,6 +5,7 @@
       class="scroll-wrapper"
       :scrollX="true"
       :scrollY="false"
+      :data="list"
     >
       <ul class="list">
         <scroll-row-item

@@ -20,25 +20,24 @@
 </template>
 
 <script>
-import {getRankList, getRankListAll} from 'api/rank'
-import {mapMutations} from 'vuex'
+import { getRankListAll } from 'api/rank'
+import { mapMutations } from 'vuex'
 import Scroll from 'common/scroll'
 import Slide from 'common/animation/slide'
 import RankItem from './RankItem'
 import Loading from 'common/loading/loading'
 export default {
-  data() {
+  data () {
     return {
       rankList: []
     }
   },
-  created() {
+  created () {
     this._getRankList()
   },
   methods: {
     async _getRankList () {
       const res = await getRankListAll()
-      console.log(res)
       this.rankList = res
     },
     handleClickRank (item) {
@@ -52,7 +51,7 @@ export default {
       this.$refs.scroll.$el.style.bottom = bottom
       this.$refs.scroll.refresh()
     },
-    ...mapMutations ({
+    ...mapMutations({
       setRank: 'SET_RANK'
     })
   },

@@ -1,10 +1,10 @@
-const path = require('path');
-const bodyParser = require('body-parser')
+const path = require('path')
 function resolve (dir) {
-  return path.join(__dirname,  dir)
+  return path.join(__dirname, dir)
 }
 module.exports = {
   lintOnSave: true,
+  // publicPath: 'http://101.200.50.231/music',
   publicPath: './',
   css: {
     loaderOptions: {
@@ -20,20 +20,20 @@ module.exports = {
   },
   chainWebpack: config => {
     config.resolve.alias
-      .set('@',resolve('src'))
-      .set('styles',resolve('src/assets/styles'))
-      .set('common',resolve('src/common'))
-      .set('api',resolve('src/api'))
+      .set('@', resolve('src'))
+      .set('styles', resolve('src/assets/styles'))
+      .set('common', resolve('src/common'))
+      .set('api', resolve('src/api'))
   },
   devServer: {
-    host: '192.168.1.2',
-    proxy: {
-      '/api': {
-        target: 'http://101.200.50.231:3000/',
-        pathRewrite: {
-          '^/api': ''
-        }
-      }
-    }
+    host: '192.168.1.2'
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://101.200.50.231:3000/',
+    //     pathRewrite: {
+    //       '^/api': ''
+    //     }
+    //   }
+    // }
   }
 }

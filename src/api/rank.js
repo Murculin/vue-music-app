@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from './axios'
 import { processSongsUrl } from './music'
 import { creatSong } from '@/assets/js/song'
 
@@ -14,7 +14,7 @@ class RankList {
 }
 
 function getRankList (id = 1) {
-  const url = `api/top/list?idx=${id}`
+  const url = `/top/list?idx=${id}`
   return axios.get(url)
 }
 
@@ -39,7 +39,7 @@ export function getRankListAll () {
 }
 
 export function getRankDetail (idx) {
-  const url = `api/top/list?idx=${idx}`
+  const url = `/top/list?idx=${idx}`
   return new Promise((resolve, reject) => {
     axios.get(url).then(res => {
       if (res.status === 200) {

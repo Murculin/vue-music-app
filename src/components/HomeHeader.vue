@@ -46,7 +46,6 @@ export default {
   },
   methods: {
     handleClickInput () {
-      console.log(this.$route.path)
       this.$router.push('/search')
     }
   }

@@ -1,12 +1,12 @@
 import { commonParams } from './config'
 import { getUid } from '@/assets/js/uid'
-import axios from 'axios'
+import axios from './axios'
 import { ERR_OK } from 'api/config'
 
 const debug = process.env.NODE_ENV !== 'production'
 
 export function getLyric (id) {
-  const url = '/api/lyric'
+  const url = '/lyric'
   return axios.get(url, {
     params: {
       id
@@ -17,7 +17,7 @@ export function getLyric (id) {
 }
 
 export function getSongsUrl (songs) {
-  const url = debug ? '/api/getPurlUrl' : 'http://ustbhuangyi.com/music/api/getPurlUrl'
+  const url = debug ? '/getPurlUrl' : 'http://ustbhuangyi.com/music/api/getPurlUrl'
 
   let mids = []
   let types = []

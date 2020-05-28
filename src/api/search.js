@@ -1,11 +1,11 @@
-import axios from 'axios'
+import axios from './axios'
 import { createSearchSong } from '@/assets/js/song'
 
 const LIMIT = 30
 const imgurl = `/album?id=32311 .album.picUrl`
 
 export function getHotKey () {
-  const url = `api/search/hot`
+  const url = `/search/hot`
   return new Promise((resolve, reject) => {
     axios.get(url).then(res => {
       if (res.status === 200) {
@@ -16,7 +16,7 @@ export function getHotKey () {
 }
 
 export function getSingers (query) {
-  const url = `api/search/multimatch?keywords=${query}`
+  const url = `/search/multimatch?keywords=${query}`
   return new Promise((resolve, reject) => {
     axios.get(url)
       .then(res => {
@@ -34,7 +34,7 @@ export function getSingers (query) {
 
 export function getResult (query, type, page) {
   const offset = (page - 1) * 30
-  const url = `api/search?keywords=${query}`
+  const url = `/search?keywords=${query}`
   return new Promise((resolve, reject) => {
     axios.get(url, {
       params: {
@@ -59,7 +59,7 @@ export function getSongImg (list) {
     if (!id) {
       return
     }
-    const url = `api/album?id=${id}`
+    const url = `/album?id=${id}`
     axios.get(url).then(res => {
       if (res.status === 200) {
         music.image = res.data.album.picUrl

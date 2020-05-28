@@ -85,7 +85,6 @@ export default {
     async _getDiscList () {
       const res = await getDiscList(this.lasttime)
       this.loading = false
-      console.log(res)
       if (res.code === 200) {
         this.lasttime = res.lasttime
         this.discList = this.discList.concat(res.playlists)

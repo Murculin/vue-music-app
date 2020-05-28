@@ -127,14 +127,15 @@ export default {
       this.scrollY = pos.y
     },
     setCurrentLyric () {
-      for (let i = 0; i < this.lyrics.length; i++) {
-        const item = this.lyrics[i]
-        if (i === this.lyrics.length - 1) {
+      const lyrics = this.lyrics
+      for (let i = 0; i < lyrics.length; i++) {
+        const item = lyrics[i]
+        if (this.currentTime >= lyrics[lyrics.length - 1].time) {
           this.currentLyric = item
-          this.onIndex = i
+          this.onIndex = lyrics.length - 1
           return
         }
-        if (this.currentTime > item.time && this.currentTime < this.lyrics[i + 1].time) {
+        if (this.currentTime >= item.time && this.currentTime < lyrics[i + 1].time) {
           this.currentLyric = item
           this.onIndex = i
           return
