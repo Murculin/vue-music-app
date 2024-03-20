@@ -12,29 +12,7 @@
 
 项目为单页面应用，使用vue-router实现路由，vuex管理组件通信
 
-# 目录结构
 
-├─api		// 请求相关的函数
-├─assets	// css js等资源
-│  ├─images
-│  ├─js
-│  └─styles
-│      └─iconfont
-├─common	// 公共组件
-│  ├─animation
-│  ├─loading
-│  ├─music-list
-|	......
-│  └─tab-bar
-├─components	// 页面及仅在特点页面使用的组件
-│  ├─player
-│  │  └─add-list
-│  ├─rank
-│  │  └─rank-detail
-│ 	......
-│  └─user-center
-├─util			// 工具函数
-└─vuex			// vuex相关
 
 ## 安装项目
 
